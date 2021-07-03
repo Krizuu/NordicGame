@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class PlayerMovement : MonoBehaviour
 {
@@ -8,6 +9,7 @@ public class PlayerMovement : MonoBehaviour
     public Animator animator;
 
     public Joystick joystick;
+    public Button button_fight;
 
     float moveLimiter = 0.7f; //zmienna ograniczaj¹ca ruch po ukosie
 
@@ -15,10 +17,13 @@ public class PlayerMovement : MonoBehaviour
 
     Vector2 movement;
 
+    private bool button_fightPressed;
+
     // Start is called before the first frame update
     void Start()
     {
         body = GameObject.Find("Player").GetComponent<Rigidbody2D>(); //Pobiera komponent i przechowuje go w wczeœniej przygotowanej zmiennej, dziêki temu nie musimy rêcznie przypisywaæ komponentu.
+        button_fight.onClick.AddListener(OnButtonFightClick);
     }
 
     // Update is called once per frame
@@ -30,9 +35,23 @@ public class PlayerMovement : MonoBehaviour
         //movement.y = Input.GetAxisRaw("Vertical"); //Analogicznie jak dla poprzedniej funkcji; strza³ka w górê lub "W" to wartoœæ 1 natomiast strza³ka w dó³ lub "S" to wartoœæ -1. 
         //Brak wykonanej akcji oznacza 0
         movement.y = joystick.Vertical;
-        animator.SetFloat("Horizontal", movement.x);
-        animator.SetFloat("Vertical", movement.y);
+        animator.SetFloat("Horizontal_move", movement.x);
+        animator.SetFloat("Vertical_move", movement.y);
         animator.SetFloat("Speed", movement.sqrMagnitude);
+        if (movement.sqrMagnitude != 0 && !animator.GetCurrentAnimatorStateInfo(0).IsName("Fight"))
+        {
+            animator.SetBool("isWalking", true);
+        }
+        else
+        {
+            animator.SetBool("isWalking", false);
+        }
+        if(button_fightPressed && !animator.GetCurrentAnimatorStateInfo(0).IsName("Fight"))
+        {
+            animator.SetBool("isWalking", false);
+            animator.SetTrigger("Fight");
+            button_fightPressed = false;
+        }
     }
 
     private void FixedUpdate()
@@ -44,5 +63,10 @@ public class PlayerMovement : MonoBehaviour
             movement.y *= moveLimiter;
         }
         body.velocity = new Vector2(movement.x * runSpeed, movement.y * runSpeed); //parametr velocity przyjmuje wektor sk³adaj¹cy siê z x oraz y. Dla x poruszamy siê w poziomie a dla y w pionie
+    }
+
+    void OnButtonFightClick()
+    {
+        button_fightPressed = true;
     }
 }

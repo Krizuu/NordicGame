@@ -337,6 +337,7 @@
 "Assets/Joystick Pack/Scripts/Joysticks/FixedJoystick.cs"
 "Assets/Joystick Pack/Scripts/Joysticks/FloatingJoystick.cs"
 "Assets/Joystick Pack/Scripts/Joysticks/VariableJoystick.cs"
+"Assets/Scripts/EnemyMovement.cs"
 "Assets/Scripts/PlayerMovement.cs"
 -langversion:8.0
 
