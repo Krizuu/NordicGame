@@ -17,23 +17,23 @@ public class Inventory : MonoBehaviour
     public delegate void OnItemChanged();
     public OnItemChanged onItemChangedCallback;
 
-
     private void Start()
     {
-        onItemChangedCallback += updateUI;
-        itemSlots = itemSlotsParent.GetComponentsInChildren<ItemSlot>();
+        onItemChangedCallback += updateUI; //Do onItemChangedCallback dodajê funkcjê updateUI
+        itemSlots = itemSlotsParent.GetComponentsInChildren<ItemSlot>(); //£aduje wszystkie ItemSloty do tablicy
         Debug.Log("Slots: " + itemSlots.Length);
     }
 
     private void Update()
     {
         if (Input.GetKeyDown(KeyCode.I))
-            inventoryShow = !inventoryShow;
-
+            toggleUI();
         if (inventoryShow == true)
-            inventory.SetActive(true);
+            inventory.SetActive(true); //Wy³¹czenie widocznoœci ekwipunku
         else
-            inventory.SetActive(false);
+            inventory.SetActive(false); //W³¹czenie widocznoœci ekwipunku
+        if (Input.GetMouseButtonDown(0))
+            pickUp();
     }
 
     public void addItem(Item item){
@@ -41,7 +41,7 @@ public class Inventory : MonoBehaviour
             Debug.Log("Added " + item.name);
             items.Add(item);
             if (onItemChangedCallback != null)
-                onItemChangedCallback.Invoke();
+                onItemChangedCallback.Invoke(); //Odœwie¿enie ekwipunku
         }
         else
             Debug.Log("Inventory is full!");
@@ -55,7 +55,7 @@ public class Inventory : MonoBehaviour
         {
             Debug.Log("Removed " + item.name);
             if (onItemChangedCallback != null)
-                onItemChangedCallback.Invoke();
+                onItemChangedCallback.Invoke(); //Odœwie¿enie ekwipunku
         }
         else
             Debug.Log("Failed to remove " + item.name);
@@ -73,6 +73,21 @@ public class Inventory : MonoBehaviour
                 itemSlots[i].addItem(items[i]);
             else
                 itemSlots[i].clearSlot();
+        }
+    }
+
+    void pickUp()
+    {
+        Collider2D result = Physics2D.OverlapPoint(Camera.main.ScreenToWorldPoint(Input.mousePosition));
+
+        if (result != null && result.transform.tag == "Item")
+        {
+            //Debug.Log(Vector2.Distance(transform.position, result.transform.position));
+            if (Vector2.Distance(transform.position, result.transform.position) < 1.2)
+            {
+                addItem(result.transform.GetComponent<ItemPickup>().item);
+                Destroy(result.transform.gameObject);
+            }
         }
     }
 }
