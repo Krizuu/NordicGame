@@ -12,5 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e710efc420b952244bcf3b0378193cb0, type: 3}
   m_Name: Test Item
   m_EditorClassIdentifier: 
-  name: Sword
-  pixelart: {fileID: 21300000, guid: 015c4e48f9de32245912cab5b772b0e1, type: 3}
+  name: Placeholder
+  pixelart: {fileID: 21300000, guid: be65780464895694691965150d19948b, type: 3}
