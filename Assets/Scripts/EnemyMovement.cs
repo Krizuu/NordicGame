@@ -4,8 +4,8 @@ using UnityEngine;
 
 public class EnemyMovement : MonoBehaviour
 {
-    Rigidbody2D body;
     public Animator animator;
+    public GameObject player;
     public float waitTime = 2f;
     public float directionChangeTime = 1f;
     public float moveSpeed = 2f;
@@ -17,11 +17,12 @@ public class EnemyMovement : MonoBehaviour
 
     public Vector3 bottomLeftLimit;
     public Vector3 topRightLimit;
+    public float enemyRange;
+    public float hitRange;
 
     // Start is called before the first frame update
     void Start()
     {
-        body = GameObject.Find("Enemy_1").GetComponent<Rigidbody2D>();
         isWaiting = false;
         latestDirectionChangeTime = 0f;
         CalcuateNewMovementVector();
@@ -29,6 +30,36 @@ public class EnemyMovement : MonoBehaviour
 
     // Update is called once per frame
     void Update()
+    {
+        if (Vector2.Distance(transform.position, player.transform.position) > enemyRange)
+        {
+            WalkRandomly();
+        }
+        else if (Vector2.Distance(transform.position, player.transform.position) <= enemyRange)
+        {
+            print("Player in enemy area!");
+            if (Vector2.Distance(transform.position, player.transform.position) <= hitRange)
+            {
+
+            }
+        }
+    }
+
+    void CalcuateNewMovementVector()
+    {
+        // Create a random direction vector with the magnitude of 1, later multiply it with the velocity of the enemy
+        movementDirection = new Vector2(Random.Range(-1.0f, 1.0f), Random.Range(-1.0f, 1.0f)).normalized;
+        movementPerSecond = movementDirection * moveSpeed;
+    }
+
+    void InvokeIsWaiting()
+    {
+        latestDirectionChangeTime = Time.time;
+        CalcuateNewMovementVector();
+        isWaiting = false;
+    }
+
+    void WalkRandomly()
     {
         // If the changeTime was reached, calculate a new movement vector
         if (Time.time - latestDirectionChangeTime > directionChangeTime && !isWaiting)
@@ -51,21 +82,7 @@ public class EnemyMovement : MonoBehaviour
 
         // $$anonymous$$eep the enemy inside the bounds of a particular area
         //transform.position = new Vector3(Mathf.Clamp(transform.position.x, bottomLeftLimit.x, topRightLimit.x),
-            //Mathf.Clamp(transform.position.y, bottomLeftLimit.y, topRightLimit.y), transform.position.z);
-
+        //Mathf.Clamp(transform.position.y, bottomLeftLimit.y, topRightLimit.y), transform.position.z);
     }
 
-    void CalcuateNewMovementVector()
-    {
-        // Create a random direction vector with the magnitude of 1, later multiply it with the velocity of the enemy
-        movementDirection = new Vector2(Random.Range(-1.0f, 1.0f), Random.Range(-1.0f, 1.0f)).normalized;
-        movementPerSecond = movementDirection * moveSpeed;
-    }
-
-    void InvokeIsWaiting()
-    {
-        latestDirectionChangeTime = Time.time;
-        CalcuateNewMovementVector();
-        isWaiting = false;
-    }
 }

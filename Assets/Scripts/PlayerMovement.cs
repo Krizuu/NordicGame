@@ -7,17 +7,16 @@ public class PlayerMovement : MonoBehaviour
 {
     Rigidbody2D body; //Okreœlamy nazwê dla zmiennej przechowuj¹cej model fizyczny postaci
     public Animator animator;
-
     public Joystick joystick;
     public Button button_fight;
-
-    float moveLimiter = 0.7f; //zmienna ograniczaj¹ca ruch po ukosie
-
     public float runSpeed = 5.0f;
+    public float attackTime;
 
     Vector2 movement;
 
-    private bool button_fightPressed;
+    float moveLimiter = 0.7f; //zmienna ograniczaj¹ca ruch po ukosie
+    public bool button_fightPressed;
+    private float attackTimeCounter;
 
     // Start is called before the first frame update
     void Start()
@@ -38,35 +37,48 @@ public class PlayerMovement : MonoBehaviour
         animator.SetFloat("Horizontal_move", movement.x);
         animator.SetFloat("Vertical_move", movement.y);
         animator.SetFloat("Speed", movement.sqrMagnitude);
-        if (movement.sqrMagnitude != 0 && !animator.GetCurrentAnimatorStateInfo(0).IsName("Fight"))
+        
+        if(attackTimeCounter > 0)
+        {
+            attackTimeCounter -= Time.deltaTime;
+        }
+        if (attackTimeCounter <= 0)
+        {
+            button_fightPressed = false;
+            animator.SetBool("isWalking", true);
+        }
+        if(movement.sqrMagnitude != 0 && !animator.GetCurrentAnimatorStateInfo(0).IsName("Fight"))
         {
             animator.SetBool("isWalking", true);
+            animator.SetFloat("Horizontal_move_previous", animator.GetFloat("Horizontal_move"));
+            animator.SetFloat("Vertical_move_previous", animator.GetFloat("Vertical_move"));
         }
         else
         {
             animator.SetBool("isWalking", false);
         }
-        if(button_fightPressed && !animator.GetCurrentAnimatorStateInfo(0).IsName("Fight"))
-        {
-            animator.SetBool("isWalking", false);
-            animator.SetTrigger("Fight");
-            button_fightPressed = false;
-        }
     }
 
     private void FixedUpdate()
     {
-        if (movement.x != 0 && movement.y != 0) //SprawdŸ czy gracz idzie po ukosie
+        if (!button_fightPressed)
         {
-            //Zmniejsz prêdkoœæ gracza
-            movement.x *= moveLimiter;
-            movement.y *= moveLimiter;
+            if (movement.x != 0 && movement.y != 0) //SprawdŸ czy gracz idzie po ukosie
+            {
+                //Zmniejsz prêdkoœæ gracza
+                movement.x *= moveLimiter;
+                movement.y *= moveLimiter;
+            }
+            body.velocity = new Vector2(movement.x * runSpeed, movement.y * runSpeed); //parametr velocity przyjmuje wektor sk³adaj¹cy siê z x oraz y. Dla x poruszamy siê w poziomie a dla y w pionie
         }
-        body.velocity = new Vector2(movement.x * runSpeed, movement.y * runSpeed); //parametr velocity przyjmuje wektor sk³adaj¹cy siê z x oraz y. Dla x poruszamy siê w poziomie a dla y w pionie
     }
 
     void OnButtonFightClick()
     {
+        attackTimeCounter = attackTime;
         button_fightPressed = true;
+        body.velocity = Vector2.zero;
+        animator.SetTrigger("Fight");
+        animator.SetBool("isWalking", false);
     }
 }
