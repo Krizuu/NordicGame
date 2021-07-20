@@ -48,7 +48,7 @@ public class PlayerStats : MonoBehaviour
             GainExperience(100);
     }
 
-    void TakeDamage(int amount)
+    public void TakeDamage(int amount)
     {
         health -= amount;
         HealthBar.setValue(health);
@@ -100,7 +100,7 @@ public class PlayerStats : MonoBehaviour
         StaminaBar.setValue(stamina);
     }
 
-    void GainExperience(int amount)
+    public void GainExperience(int amount)
     {
         if (experience + amount >= maxExperience)
         {
