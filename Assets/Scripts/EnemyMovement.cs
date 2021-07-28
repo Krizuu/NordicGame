@@ -4,8 +4,9 @@ using UnityEngine;
 
 public class EnemyMovement : MonoBehaviour
 {
+    Rigidbody2D body;
     public Animator animator;
-    public GameObject player;
+    GameObject player;
     public float waitTime = 2f;
     public float directionChangeTime = 1f;
     public float moveSpeed = 2f;
@@ -14,15 +15,18 @@ public class EnemyMovement : MonoBehaviour
     private Vector2 movementDirection;
     private Vector2 movementPerSecond;
     private bool isWaiting;
+    private bool isWalkRandom;
+    private bool isFollow;
 
     public Vector3 bottomLeftLimit;
     public Vector3 topRightLimit;
     public float enemyRange;
-    public float hitRange;
 
     // Start is called before the first frame update
     void Start()
     {
+        body = GetComponent<Rigidbody2D>();
+        player = GameObject.FindGameObjectWithTag("Player");
         isWaiting = false;
         latestDirectionChangeTime = 0f;
         CalcuateNewMovementVector();
@@ -33,15 +37,28 @@ public class EnemyMovement : MonoBehaviour
     {
         if (Vector2.Distance(transform.position, player.transform.position) > enemyRange)
         {
+            GetComponent<EnemyStats>().HealthBar.SetActive(false);
+            isWalkRandom = true;
+            isFollow = false;
+        }
+        else if (Vector2.Distance(transform.position, player.transform.position) <= enemyRange && !isFollow)
+        {
+            GetComponent<EnemyStats>().HealthBar.SetActive(true);
+            body.velocity = new Vector2(0, 0);
+            isWalkRandom = false;
+            isFollow = true;
+        }
+    }
+
+    private void FixedUpdate()
+    {
+        if(isWalkRandom)
+        {
             WalkRandomly();
         }
-        else if (Vector2.Distance(transform.position, player.transform.position) <= enemyRange)
+        if(isFollow)
         {
-            print("Player in enemy area!");
-            if (Vector2.Distance(transform.position, player.transform.position) <= hitRange)
-            {
-
-            }
+            FollowPlayer();
         }
     }
 
@@ -66,7 +83,7 @@ public class EnemyMovement : MonoBehaviour
         {
             isWaiting = true;
             Invoke("InvokeIsWaiting", waitTime);
-            movementPerSecond = Vector3.zero;
+            movementPerSecond = Vector2.zero;
         }
         if (isWaiting == true)
         {
@@ -76,13 +93,25 @@ public class EnemyMovement : MonoBehaviour
         {
             animator.SetBool("isWalking", true);
         }
-
+        body.velocity = new Vector2(movementPerSecond.x, movementPerSecond.y);
         // $$anonymous$$ove enemy 
-        transform.position = new Vector2(transform.position.x + (movementPerSecond.x * Time.deltaTime), transform.position.y + (movementPerSecond.y * Time.deltaTime));
+        //transform.position = new Vector2(transform.position.x + (movementPerSecond.x * Time.deltaTime), transform.position.y + (movementPerSecond.y * Time.deltaTime));
 
         // $$anonymous$$eep the enemy inside the bounds of a particular area
         //transform.position = new Vector3(Mathf.Clamp(transform.position.x, bottomLeftLimit.x, topRightLimit.x),
         //Mathf.Clamp(transform.position.y, bottomLeftLimit.y, topRightLimit.y), transform.position.z);
     }
 
+    public Vector2 getDirection(Vector2 a, Vector2 b)
+    {
+        return (b - a).normalized;
+    }
+
+    void FollowPlayer()
+    {
+        animator.SetBool("isWalking", true);
+        //animator.SetBool("isWalking", true);
+        Vector2 playerDirection = getDirection(transform.position, player.transform.position);
+        body.AddForce(playerDirection, ForceMode2D.Force);
+    }
 }

@@ -21,8 +21,12 @@ public class HitEnemy : MonoBehaviour
     {
         if(other.gameObject.tag == "Enemy" && Player.GetComponent<PlayerMovement>().button_fightPressed)
         {
-            Destroy(other.gameObject);
+            other.gameObject.GetComponent<EnemyStats>().TakeDamage(40);
+            if(other.gameObject.GetComponent<EnemyStats>().health <= 0)
+            {
+                Player.GetComponent<PlayerStats>().GainExperience(other.gameObject.GetComponent<EnemyStats>().experienceGain);
+                Destroy(other.gameObject);
+            }
         }
-        print("Hit something");
     }
 }
